@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ElectricityInput(BaseModel):
@@ -17,8 +17,12 @@ class FuelInput(BaseModel):
 
 class TransportInput(BaseModel):
     voiture_km: float = 0
-    motorisation: Literal["thermique", "hybride", "electrique"] = "thermique"
-    occupants: float = 1  # personnes dans le véhicule (covoiturage) — divise la part personnelle
+    motorisation: Literal[
+        "thermique",
+        "hybride",
+        "electrique"
+    ] = "thermique"
+    occupants: float = 1
     moto_km: float = 0
     bus_km: float = 0
     train_km: float = 0
@@ -27,7 +31,7 @@ class TransportInput(BaseModel):
 
 class BuildingInput(BaseModel):
     surface_m2: float = 0
-    household_size: float = 1  # personnes du foyer — divise l'allocation logement par personne
+    household_size: float = 1
 
 
 class IndustryInput(BaseModel):
@@ -35,7 +39,13 @@ class IndustryInput(BaseModel):
 
 
 class FoodInput(BaseModel):
-    diet_type: Literal["omnivore", "flexitarien", "vegetarien", "vegan", "sans_objet"] = "omnivore"
+    diet_type: Literal[
+        "omnivore",
+        "flexitarien",
+        "vegetarien",
+        "vegan",
+        "sans_objet"
+    ] = "omnivore"
 
 
 class WasteInput(BaseModel):
@@ -44,15 +54,35 @@ class WasteInput(BaseModel):
 
 
 class CalculationCreate(BaseModel):
-    user_id: int
     label: str | None = None
-    electricity: ElectricityInput = ElectricityInput()
-    fuel: FuelInput = FuelInput()
-    transport: TransportInput = TransportInput()
-    building: BuildingInput = BuildingInput()
-    industry: IndustryInput = IndustryInput()
-    food: FoodInput = FoodInput()
-    waste: WasteInput = WasteInput()
+
+    electricity: ElectricityInput = Field(
+        default_factory=ElectricityInput
+    )
+
+    fuel: FuelInput = Field(
+        default_factory=FuelInput
+    )
+
+    transport: TransportInput = Field(
+        default_factory=TransportInput
+    )
+
+    building: BuildingInput = Field(
+        default_factory=BuildingInput
+    )
+
+    industry: IndustryInput = Field(
+        default_factory=IndustryInput
+    )
+
+    food: FoodInput = Field(
+        default_factory=FoodInput
+    )
+
+    waste: WasteInput = Field(
+        default_factory=WasteInput
+    )
 
 
 class CalculationResponse(BaseModel):

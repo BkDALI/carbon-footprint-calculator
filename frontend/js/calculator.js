@@ -32,15 +32,37 @@ const historyBody = document.getElementById("historyBody");
 
 function openHistoryModal() {
   historyModal.classList.remove("hidden");
-  historyBody.innerHTML = '<p class="results-placeholder">Chargement…</p>';
-  fetch(`${API_BASE}/calculations/user/${session.id}`)
+  historyBody.innerHTML =
+    '<p class="results-placeholder">Chargement…</p>';
+
+  fetch(`${API_BASE}/calculations/user`, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+  })
     .then((res) => {
-      if (!res.ok) throw new Error("Impossible de charger l'historique.");
+      if (res.status === 401) {
+        clearSession();
+        window.location.href = "connexion.html";
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(
+          "Impossible de charger l'historique."
+        );
+      }
+
       return res.json();
     })
-    .then(renderHistory)
+    .then((data) => {
+      if (data) {
+        renderHistory(data);
+      }
+    })
     .catch((err) => {
-      historyBody.innerHTML = `<p class="results-placeholder">${err.message}</p>`;
+      historyBody.innerHTML =
+        `<p class="results-placeholder">${err.message}</p>`;
     });
 }
 
@@ -813,21 +835,86 @@ async function submitCalculation() {
   nextBtn.textContent = "Calcul en cours...";
 
   const payload = {
-    user_id: session.id,
-    label: document.getElementById("label").value.trim() || `Calcul du ${new Date().toLocaleDateString("fr-FR")}`,
-    electricity: { consumption_kwh: answers.electricity_kwh },
-    fuel: { essence_litres: answers.essence_litres, diesel_litres: answers.diesel_litres, gpl_litres: answers.gpl_litres, gaz_naturel_m3: answers.gaz_naturel_m3 },
-    transport: { voiture_km: answers.voiture_km, motorisation: answers.motorisation, occupants: answers.occupants, moto_km: answers.moto_km, bus_km: answers.bus_km, train_km: answers.train_km, avion_km: answers.avion_km },
-    building: { surface_m2: answers.surface_m2, household_size: answers.household_size },
-    industry: { quantite_produite: answers.quantite_produite },
-    food: { diet_type: answers.diet_type },
-    waste: { non_trie_kg_semaine: answers.waste_non_trie, trie_kg_semaine: answers.waste_trie },
-  };
+  label:
+    document.getElementById("label").value.trim()
+    || `Calcul du ${new Date().toLocaleDateString("fr-FR")}`,
+
+  electricity: {
+    consumption_kwh:
+      answers.electricity_kwh
+  },
+
+  fuel: {
+    essence_litres:
+      answers.essence_litres,
+
+    diesel_litres:
+      answers.diesel_litres,
+
+    gpl_litres:
+      answers.gpl_litres,
+
+    gaz_naturel_m3:
+      answers.gaz_naturel_m3
+  },
+
+  transport: {
+    voiture_km:
+      answers.voiture_km,
+
+    motorisation:
+      answers.motorisation,
+
+    occupants:
+      answers.occupants,
+
+    moto_km:
+      answers.moto_km,
+
+    bus_km:
+      answers.bus_km,
+
+    train_km:
+      answers.train_km,
+
+    avion_km:
+      answers.avion_km
+  },
+
+  building: {
+    surface_m2:
+      answers.surface_m2,
+
+    household_size:
+      answers.household_size
+  },
+
+  industry: {
+    quantite_produite:
+      answers.quantite_produite
+  },
+
+  food: {
+    diet_type:
+      answers.diet_type
+  },
+
+  waste: {
+    non_trie_kg_semaine:
+      answers.waste_non_trie,
+
+    trie_kg_semaine:
+      answers.waste_trie
+  },
+};
 
   try {
     const res = await fetch(`${API_BASE}/calculations/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+  "Content-Type": "application/json",
+  ...getAuthHeaders(),
+},
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error("Le calcul a échoué. Vérifiez que le serveur tourne.");

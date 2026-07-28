@@ -59,9 +59,14 @@ function renderHistory(items) {
         </div>
         <div class="history-item__total">${(item.total_co2eq_kg / 1000).toFixed(2)} tCO₂e</div>
         <div class="history-item__actions">
-          <a href="${API_BASE}/calculations/${item.id}/pdf" target="_blank" rel="noopener">PDF</a>
-          <a href="${API_BASE}/calculations/${item.id}/excel" target="_blank" rel="noopener">Excel</a>
-        </div>
+  <button type="button" onclick="downloadReport(${item.id}, 'pdf')">
+    PDF
+  </button>
+
+  <button type="button" onclick="downloadReport(${item.id}, 'excel')">
+    Excel
+  </button>
+</div>
       </div>`;
   }).join("");
 }
@@ -865,4 +870,63 @@ function renderFinalResults(data) {
 
   document.getElementById("downloadPdfBtn").href = `${API_BASE}/calculations/${data.id}/pdf`;
   document.getElementById("downloadExcelBtn").href = `${API_BASE}/calculations/${data.id}/excel`;
+}
+
+async function downloadReport(calculationId, type) {
+  try {
+    const response = await fetch(
+      `${API_BASE}/calculations/${calculationId}/${type}`,
+      {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      }
+    );
+
+    if (response.status === 401) {
+      clearSession();
+      window.location.href = "connexion.html";
+      return;
+    }
+
+    if (response.status === 403) {
+      alert(
+        "Vous n'avez pas accès à ce rapport."
+      );
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        "Impossible de télécharger le rapport."
+      );
+    }
+
+    const blob =
+      await response.blob();
+
+    const url =
+      window.URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+      type === "pdf"
+        ? `rapport_empreinte_${calculationId}.pdf`
+        : `empreinte_${calculationId}.xlsx`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    alert(error.message);
+  }
 }

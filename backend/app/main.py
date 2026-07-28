@@ -14,13 +14,20 @@ app = FastAPI(
 )
 
 
-# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+
+    allow_origins=[
+        "https://bkdali.github.io",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+    ],
+
+    allow_credentials=True,
+
     allow_methods=["*"],
+
     allow_headers=["*"],
-    allow_credentials=False,
 )
 
 
@@ -32,7 +39,8 @@ def startup():
 @app.get("/")
 def home():
     return {
-        "message": "Welcome to Carbon Footprint Calculator API"
+        "message":
+        "Welcome to Carbon Footprint Calculator API"
     }
 
 
@@ -43,7 +51,6 @@ def health():
     }
 
 
-# Routers
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(calculations_router)
