@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://carbon-footprint-api.onrender.com";
 
 const session = typeof getSession === "function" ? getSession() : null;
 if (!session) window.location.href = "connexion.html";
