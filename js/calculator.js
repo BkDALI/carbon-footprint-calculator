@@ -5,12 +5,26 @@ if (!session) window.location.href = "connexion.html";
 
 if (session) {
   const user = session.user || session;
-const fullName = user.full_name || user.name || "";
-const firstName = fullName.trim().split(/\s+/)[0] || "Utilisateur";
+  const fullName = user.full_name || user.name || "Utilisateur";
+  const firstName = fullName.trim().split(/\s+/)[0] || "Utilisateur";
 
-document.getElementById("accountName").textContent = firstName;
-  document.getElementById("accountAvatar").textContent = session.full_name
-    .split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  const accountName = document.getElementById("accountName");
+  if (accountName) {
+    accountName.textContent = firstName;
+  }
+
+  const accountAvatar = document.getElementById("accountAvatar");
+  if (accountAvatar) {
+    const initials = fullName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((p) => p[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+    accountAvatar.textContent = initials || "U";
+  }
 }
 
 document.getElementById("accountTrigger")?.addEventListener("click", () => {
@@ -37,12 +51,30 @@ const historyBody = document.getElementById("historyBody");
 function openHistoryModal() {
   historyModal.classList.remove("hidden");
   historyBody.innerHTML = '<p class="results-placeholder">Chargement…</p>';
-  fetch(`${API_BASE}/calculations/user/${session.id}`)
+
+  fetch(`${API_BASE}/calculations/user`, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+  })
     .then((res) => {
-      if (!res.ok) throw new Error("Impossible de charger l'historique.");
+      if (res.status === 401) {
+        clearSession();
+        window.location.href = "connexion.html";
+        return null;
+      }
+
+      if (!res.ok) {
+        throw new Error("Impossible de charger l'historique.");
+      }
+
       return res.json();
     })
-    .then(renderHistory)
+    .then((data) => {
+      if (data) {
+        renderHistory(data);
+      }
+    })
     .catch((err) => {
       historyBody.innerHTML = `<p class="results-placeholder">${err.message}</p>`;
     });
@@ -63,14 +95,9 @@ function renderHistory(items) {
         </div>
         <div class="history-item__total">${(item.total_co2eq_kg / 1000).toFixed(2)} tCO₂e</div>
         <div class="history-item__actions">
-  <button type="button" onclick="downloadReport(${item.id}, 'pdf')">
-    PDF
-  </button>
-
-  <button type="button" onclick="downloadReport(${item.id}, 'excel')">
-    Excel
-  </button>
-</div>
+          <button type="button" onclick="downloadReport(${item.id}, 'pdf')">PDF</button>
+          <button type="button" onclick="downloadReport(${item.id}, 'excel')">Excel</button>
+        </div>
       </div>`;
   }).join("");
 }
@@ -822,7 +849,6 @@ async function submitCalculation() {
   nextBtn.textContent = "Calcul en cours...";
 
   const payload = {
-    user_id: session.id,
     label: document.getElementById("label").value.trim() || `Calcul du ${new Date().toLocaleDateString("fr-FR")}`,
     electricity: { consumption_kwh: answers.electricity_kwh },
     fuel: { essence_litres: answers.essence_litres, diesel_litres: answers.diesel_litres, gpl_litres: answers.gpl_litres, gaz_naturel_m3: answers.gaz_naturel_m3 },
@@ -836,7 +862,10 @@ async function submitCalculation() {
   try {
     const res = await fetch(`${API_BASE}/calculations/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error("Le calcul a échoué. Vérifiez que le serveur tourne.");

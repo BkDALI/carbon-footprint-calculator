@@ -5,12 +5,26 @@ if (!session) window.location.href = "connexion.html";
 
 if (session) {
   const user = session.user || session;
-const fullName = user.full_name || user.name || "";
-const firstName = fullName.trim().split(/\s+/)[0] || "Utilisateur";
+  const fullName = user.full_name || user.name || "Utilisateur";
+  const firstName = fullName.trim().split(/\s+/)[0] || "Utilisateur";
 
-document.getElementById("accountName").textContent = firstName;
-  document.getElementById("accountAvatar").textContent = session.full_name
-    .split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  const accountName = document.getElementById("accountName");
+  if (accountName) {
+    accountName.textContent = firstName;
+  }
+
+  const accountAvatar = document.getElementById("accountAvatar");
+  if (accountAvatar) {
+    const initials = fullName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((p) => p[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+    accountAvatar.textContent = initials || "U";
+  }
 }
 
 document.getElementById("accountTrigger")?.addEventListener("click", () => {
@@ -36,8 +50,7 @@ const historyBody = document.getElementById("historyBody");
 
 function openHistoryModal() {
   historyModal.classList.remove("hidden");
-  historyBody.innerHTML =
-    '<p class="results-placeholder">Chargement…</p>';
+  historyBody.innerHTML = '<p class="results-placeholder">Chargement…</p>';
 
   fetch(`${API_BASE}/calculations/user`, {
     headers: {
@@ -48,13 +61,11 @@ function openHistoryModal() {
       if (res.status === 401) {
         clearSession();
         window.location.href = "connexion.html";
-        return;
+        return null;
       }
 
       if (!res.ok) {
-        throw new Error(
-          "Impossible de charger l'historique."
-        );
+        throw new Error("Impossible de charger l'historique.");
       }
 
       return res.json();
@@ -65,8 +76,7 @@ function openHistoryModal() {
       }
     })
     .catch((err) => {
-      historyBody.innerHTML =
-        `<p class="results-placeholder">${err.message}</p>`;
+      historyBody.innerHTML = `<p class="results-placeholder">${err.message}</p>`;
     });
 }
 
@@ -85,8 +95,8 @@ function renderHistory(items) {
         </div>
         <div class="history-item__total">${(item.total_co2eq_kg / 1000).toFixed(2)} tCO₂e</div>
         <div class="history-item__actions">
-          <a href="${API_BASE}/calculations/${item.id}/pdf" target="_blank" rel="noopener">PDF</a>
-          <a href="${API_BASE}/calculations/${item.id}/excel" target="_blank" rel="noopener">Excel</a>
+          <button type="button" onclick="downloadReport(${item.id}, 'pdf')">PDF</button>
+          <button type="button" onclick="downloadReport(${item.id}, 'excel')">Excel</button>
         </div>
       </div>`;
   }).join("");
@@ -839,86 +849,23 @@ async function submitCalculation() {
   nextBtn.textContent = "Calcul en cours...";
 
   const payload = {
-  label:
-    document.getElementById("label").value.trim()
-    || `Calcul du ${new Date().toLocaleDateString("fr-FR")}`,
-
-  electricity: {
-    consumption_kwh:
-      answers.electricity_kwh
-  },
-
-  fuel: {
-    essence_litres:
-      answers.essence_litres,
-
-    diesel_litres:
-      answers.diesel_litres,
-
-    gpl_litres:
-      answers.gpl_litres,
-
-    gaz_naturel_m3:
-      answers.gaz_naturel_m3
-  },
-
-  transport: {
-    voiture_km:
-      answers.voiture_km,
-
-    motorisation:
-      answers.motorisation,
-
-    occupants:
-      answers.occupants,
-
-    moto_km:
-      answers.moto_km,
-
-    bus_km:
-      answers.bus_km,
-
-    train_km:
-      answers.train_km,
-
-    avion_km:
-      answers.avion_km
-  },
-
-  building: {
-    surface_m2:
-      answers.surface_m2,
-
-    household_size:
-      answers.household_size
-  },
-
-  industry: {
-    quantite_produite:
-      answers.quantite_produite
-  },
-
-  food: {
-    diet_type:
-      answers.diet_type
-  },
-
-  waste: {
-    non_trie_kg_semaine:
-      answers.waste_non_trie,
-
-    trie_kg_semaine:
-      answers.waste_trie
-  },
-};
+    label: document.getElementById("label").value.trim() || `Calcul du ${new Date().toLocaleDateString("fr-FR")}`,
+    electricity: { consumption_kwh: answers.electricity_kwh },
+    fuel: { essence_litres: answers.essence_litres, diesel_litres: answers.diesel_litres, gpl_litres: answers.gpl_litres, gaz_naturel_m3: answers.gaz_naturel_m3 },
+    transport: { voiture_km: answers.voiture_km, motorisation: answers.motorisation, occupants: answers.occupants, moto_km: answers.moto_km, bus_km: answers.bus_km, train_km: answers.train_km, avion_km: answers.avion_km },
+    building: { surface_m2: answers.surface_m2, household_size: answers.household_size },
+    industry: { quantite_produite: answers.quantite_produite },
+    food: { diet_type: answers.diet_type },
+    waste: { non_trie_kg_semaine: answers.waste_non_trie, trie_kg_semaine: answers.waste_trie },
+  };
 
   try {
     const res = await fetch(`${API_BASE}/calculations/`, {
       method: "POST",
       headers: {
-  "Content-Type": "application/json",
-  ...getAuthHeaders(),
-},
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error("Le calcul a échoué. Vérifiez que le serveur tourne.");
@@ -956,4 +903,63 @@ function renderFinalResults(data) {
 
   document.getElementById("downloadPdfBtn").href = `${API_BASE}/calculations/${data.id}/pdf`;
   document.getElementById("downloadExcelBtn").href = `${API_BASE}/calculations/${data.id}/excel`;
+}
+
+async function downloadReport(calculationId, type) {
+  try {
+    const response = await fetch(
+      `${API_BASE}/calculations/${calculationId}/${type}`,
+      {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      }
+    );
+
+    if (response.status === 401) {
+      clearSession();
+      window.location.href = "connexion.html";
+      return;
+    }
+
+    if (response.status === 403) {
+      alert(
+        "Vous n'avez pas accès à ce rapport."
+      );
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        "Impossible de télécharger le rapport."
+      );
+    }
+
+    const blob =
+      await response.blob();
+
+    const url =
+      window.URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+      type === "pdf"
+        ? `rapport_empreinte_${calculationId}.pdf`
+        : `empreinte_${calculationId}.xlsx`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    alert(error.message);
+  }
 }

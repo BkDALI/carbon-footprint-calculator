@@ -140,8 +140,8 @@ if (form) {
         throw new Error(data.detail || "Inscription impossible.");
       }
 
-      const user = await res.json();
-      saveSession(user);
+      const authData = await res.json();
+      saveSession(authData);
 
       formSuccess.classList.add("is-visible");
       form.reset();
