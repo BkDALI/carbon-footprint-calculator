@@ -1,10 +1,15 @@
 const session = typeof getSession === "function" ? getSession() : null;
 const navActions = document.getElementById("navActions");
+
 if (session && navActions) {
+  const fullName = session.full_name || session.user?.full_name || "";
+  const firstName = fullName.trim().split(/\s+/)[0] || "Utilisateur";
+
   navActions.innerHTML = `
-    <span class="nav__user">Bonjour, ${session.full_name.split(" ")[0]}</span>
+    <span class="nav__user">Bonjour, ${firstName}</span>
     <button class="btn btn--outline" id="logoutBtn">Se déconnecter</button>
   `;
+
   document.getElementById("logoutBtn").addEventListener("click", () => {
     clearSession();
     window.location.reload();
