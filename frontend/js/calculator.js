@@ -1,4 +1,4 @@
-const API_BASE = "https://carbon-footprint-api.onrender.com";
+const API_BASE = "https://carbon-footprint-calculator-nqv9.onrender.com";
 
 const session = typeof getSession === "function" ? getSession() : null;
 if (!session) window.location.href = "connexion.html";
