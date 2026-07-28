@@ -901,8 +901,15 @@ function renderFinalResults(data) {
   const dominant = entries.sort((a, b) => b[1] - a[1])[0];
   document.getElementById("advice").textContent = dominant ? `💡 ${CATEGORY_META[dominant[0]]?.advice ?? ""}` : "";
 
-  document.getElementById("downloadPdfBtn").href = `${API_BASE}/calculations/${data.id}/pdf`;
-  document.getElementById("downloadExcelBtn").href = `${API_BASE}/calculations/${data.id}/excel`;
+  document.getElementById("downloadPdfBtn").onclick = (e) => {
+  e.preventDefault();
+  downloadReport(data.id, "pdf");
+};
+
+document.getElementById("downloadExcelBtn").onclick = (e) => {
+  e.preventDefault();
+  downloadReport(data.id, "excel");
+};
 }
 
 async function downloadReport(calculationId, type) {
