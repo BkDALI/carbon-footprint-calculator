@@ -4,7 +4,11 @@ const session = typeof getSession === "function" ? getSession() : null;
 if (!session) window.location.href = "connexion.html";
 
 if (session) {
-  document.getElementById("accountName").textContent = session.full_name.split(" ")[0];
+  const user = session.user || session;
+const fullName = user.full_name || user.name || "";
+const firstName = fullName.trim().split(/\s+/)[0] || "Utilisateur";
+
+document.getElementById("accountName").textContent = firstName;
   document.getElementById("accountAvatar").textContent = session.full_name
     .split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
