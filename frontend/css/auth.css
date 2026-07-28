@@ -1,0 +1,461 @@
+/* =========================================================
+   AUTH PAGES (Inscription / Connexion)
+   S'appuie sur les variables définies dans home.css
+   ========================================================= */
+
+/* ---------- Neutralisation des icônes masquées natives des navigateurs ---------- */
+/* Masque l'œil natif Edge / Internet Explorer */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Masque les icônes d'autofill / masquage natif WebKit (Chrome / Safari / iOS) */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+/* ---------- Base & Layout Auth ---------- */
+.auth-page-body {
+  background-image: none;
+}
+
+.auth-wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 2.6rem 1.5rem 4rem;
+}
+
+.auth-panel {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  min-height: 640px;
+}
+
+/* ---------- Illustration (colonne gauche) ---------- */
+.auth-panel__illustration {
+  position: relative;
+  background-image: url('../assets/auth-illustration.webp');
+  background-size: cover;
+  background-position: center;
+  min-height: 100%;
+}
+
+.auth-panel__illustration::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 55%, rgba(255,255,255,.35) 100%);
+}
+
+.auth-panel__leaf {
+  position: absolute;
+  left: -18px;
+  bottom: -14px;
+  width: 150px;
+  height: auto;
+  opacity: .9;
+  pointer-events: none;
+}
+
+/* ---------- Formulaire (colonne centrale) ---------- */
+.auth-panel__form {
+  padding: 3rem 3.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-icon-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--green-50);
+  color: var(--green-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.auth-icon-badge svg {
+  width: 22px;
+  height: 22px;
+}
+
+.auth-panel__form h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  margin-bottom: .5rem;
+}
+
+.auth-panel__form > p {
+  color: var(--ink-soft);
+  font-size: .92rem;
+  margin: 0 0 1.8rem;
+  max-width: 360px;
+}
+
+.auth-panel__form > p strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- Field / Inputs ---------- */
+.field {
+  margin-bottom: 1.15rem;
+}
+
+.field label {
+  display: block;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: .4rem;
+}
+
+.field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field__control svg.field-icon {
+  position: absolute;
+  left: .85rem;
+  width: 18px;
+  height: 18px;
+  color: var(--green-600);
+  flex-shrink: 0;
+  pointer-events: none; /* Empêche l'icône de bloquer les clics de frappe */
+  z-index: 1;
+}
+
+.field__control input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: .72rem .8rem .72rem 2.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: .92rem;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.field__control input:focus {
+  border-color: var(--green-600);
+  box-shadow: 0 0 0 3px var(--green-50);
+  outline: none;
+}
+
+.field__control input.has-toggle {
+  padding-right: 2.8rem;
+}
+
+/* Bouton œil personnalisable */
+.field__toggle {
+  position: absolute;
+  right: .7rem;
+  width: 32px !important; /* Force la taille pour éviter l'étirement mobile */
+  height: 32px !important;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+  touch-action: manipulation;
+}
+
+.field__toggle svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.field__toggle:hover {
+  color: var(--ink);
+}
+
+.field__error {
+  display: none;
+  color: #C0392B;
+  font-size: .78rem;
+  margin-top: .35rem;
+}
+
+.field.has-error input {
+  border-color: #C0392B;
+}
+
+.field.has-error .field__error {
+  display: block;
+}
+
+.field__hint {
+  font-size: .75rem;
+  color: var(--ink-soft);
+  margin-top: .35rem;
+}
+
+/* ---------- Password Strength ---------- */
+.password-strength {
+  display: flex;
+  gap: 4px;
+  margin-top: .5rem;
+}
+
+.password-strength i {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.password-strength[data-level="1"] i:nth-child(1) {
+  background: #E0685A;
+}
+
+.password-strength[data-level="2"] i:nth-child(1),
+.password-strength[data-level="2"] i:nth-child(2) {
+  background: var(--gold);
+}
+
+.password-strength[data-level="3"] i {
+  background: var(--green-600);
+}
+
+/* ---------- Bannières & Boutons ---------- */
+.form-banner {
+  display: none;
+  align-items: center;
+  gap: .5rem;
+  font-size: .85rem;
+  padding: .7rem .9rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.form-banner svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.form-banner--error {
+  background: #FDEDEB;
+  color: #9B3226;
+}
+
+.form-banner--success {
+  background: var(--green-50);
+  color: var(--green-700);
+}
+
+.form-banner.is-visible {
+  display: flex;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: .4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.auth-submit .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, .4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: none;
+  animation: spin .7s linear infinite;
+}
+
+.auth-submit.is-loading .spinner {
+  display: inline-block;
+}
+
+.auth-submit.is-loading .auth-submit__label {
+  opacity: .85;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: .87rem;
+  color: var(--ink-soft);
+  margin-top: 1.3rem;
+}
+
+.auth-switch a {
+  color: var(--green-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Bénéfices (colonne droite) ---------- */
+.auth-panel__benefits {
+  background: var(--bg-soft);
+  border-left: 1px solid var(--line);
+  padding: 4.2rem 2rem 2.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
+}
+
+.auth-panel__benefits > img {
+  width: 230px;
+  height: auto;
+  margin-bottom: 1.8rem;
+}
+
+.auth-panel__benefits h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  align-self: flex-start;
+  margin-bottom: 1.2rem;
+}
+
+.benefit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.benefit-list li {
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+  font-size: .85rem;
+  color: var(--ink);
+}
+
+.benefit-list__icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--green-100);
+  color: var(--green-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.benefit-list__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Corrige l'affichage de l'image CO2 si webp utilisée */
+.benefit-list__icon img,
+.benefit-list__icon .icon-img {
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain;
+  margin: 0 !important;
+  /* Rend l'icône foncée/visible si elle est blanche à l'origine */
+  filter: brightness(0) saturate(100%) invert(32%) sepia(58%) saturate(674%) hue-rotate(113deg) brightness(94%) contrast(90%);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .auth-panel {
+    grid-template-columns: 1fr;
+  }
+  .auth-panel__illustration {
+    min-height: 180px;
+  }
+  .auth-panel__leaf {
+    width: 100px;
+  }
+  .auth-panel__benefits {
+    border-left: none;
+    border-top: 1px solid var(--line);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .auth-panel__benefits > img {
+    display: none;
+  }
+  .auth-panel__benefits h2 {
+    align-self: center;
+    width: 100%;
+    text-align: center;
+  }
+  .auth-panel__form {
+    padding: 2.2rem 1.6rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .auth-wrap {
+    padding: 1.4rem 1rem 3rem;
+  }
+  .benefit-list {
+    gap: .8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+  }
+  .app-shell, .auth-panel, .login-panel {
+    display: block !important;
+  }
+  .sidebar {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  .auth-panel__illustration, .login-panel__illustration {
+    display: none !important;
+  }
+  [class*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+  .hero, .nav {
+    flex-direction: column !important;
+  }
+
+  /* Corrige le problème de frappe mobile en excluant le bouton de masque de mot de passe */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  button:not(.field__toggle) {
+    width: 100% !important;
+  }
+}

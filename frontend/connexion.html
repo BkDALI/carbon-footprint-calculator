@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Se connecter — CarbonFootprint TN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body class="auth-page-body">
+
+<header class="nav">
+  <div class="nav__brand">
+    <img src="assets/logo-icon.webp" class="brand-icon" alt="">
+    CarbonFootprint<span class="text-red">TN</span>
+  </div>
+  <nav class="nav__links">
+    <a href="index.html">Accueil</a>
+    <a href="calculateur.html">Calculateur</a>
+  </nav>
+  <div class="nav__actions">
+    <button class="btn btn--outline" id="loginBtn">Se connecter</button>
+    <button class="btn btn--primary" id="signupBtn" onclick="window.location.href='inscription.html'">S'inscrire</button>
+  </div>
+</header>
+
+<main class="login-wrap">
+
+  <img class="corner-leaf corner-leaf--left" src="assets/leaf-left.webp" alt="" aria-hidden="true">
+  <img class="corner-leaf corner-leaf--right" src="assets/leaf-right.webp" alt="" aria-hidden="true">
+
+  <div class="login-panel">
+
+    <!-- Colonne illustration + accroche -->
+    <div class="login-panel__illustration">
+      <h1>Bienvenue<br>parmi <span class="text-green">nous</span> !</h1>
+      <p>Connectez-vous à votre compte pour suivre et réduire votre empreinte carbone.</p>
+    </div>
+
+    <!-- Colonne formulaire -->
+    <div class="login-panel__form">
+      <div class="auth-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h1>Se connecter</h1>
+      <p>Accédez à votre espace personnel</p>
+
+      <div class="form-banner form-banner--error" id="formError" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="formErrorText">Email ou mot de passe incorrect.</span>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="email">Email</label>
+          <div class="field__control">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+            <input type="email" id="email" name="email" placeholder="exemple@email.com" autocomplete="email" required>
+          </div>
+          <p class="field__error">Veuillez saisir une adresse email valide.</p>
+        </div>
+
+        <div class="field" id="passwordField">
+          <label for="password">Mot de passe</label>
+          <div class="field__control">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input type="password" id="password" name="password" class="has-toggle" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" class="field__toggle" data-toggle-for="password" aria-label="Afficher le mot de passe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="field__error">Veuillez saisir votre mot de passe.</p>
+        </div>
+
+        <div class="field-row">
+          <label class="checkbox-inline">
+            <input type="checkbox" id="rememberMe" name="rememberMe" checked>
+            Se souvenir de moi
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn--primary auth-submit" id="submitBtn">
+          <span class="spinner"></span>
+          <span class="auth-submit__label">Se connecter</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">Vous n'avez pas de compte ? <a href="inscription.html">S'inscrire</a></p>
+    </div>
+
+  </div>
+
+  <div class="trust-bar">
+    <div class="trust-item">
+      <span class="trust-item__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
+      </span>
+      <div>
+        <strong>Vos données sont sécurisées</strong>
+        <span>Nous protégeons vos informations avec le plus grand soin.</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item__icon">
+        <img src="assets/co2-icon.webp" class="icon-img" alt="">
+      </span>
+      <div>
+        <strong>Engagés pour le climat</strong>
+        <span>Chaque action compte pour un avenir plus durable.</span>
+      </div>
+    </div>
+    <div class="trust-item">
+      <span class="trust-item__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+      </span>
+      <div>
+        <strong>Suivi personnalisé</strong>
+        <span>Analysez votre impact et suivez vos progrès.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>CarbonFootprint TN — Projet ATER, Association Tunisienne des Énergies Renouvelables</p>
+</footer>
+
+<script src="js/session.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

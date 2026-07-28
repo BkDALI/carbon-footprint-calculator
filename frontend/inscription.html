@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S'inscrire — CarbonFootprint TN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page-body">
+
+<header class="nav">
+  <div class="nav__brand">
+    <img src="assets/logo-icon.webp" class="brand-icon" alt="">
+    CarbonFootprint<span class="text-red">TN</span>
+  </div>
+  <nav class="nav__links">
+    <a href="index.html">Accueil</a>
+    <a href="calculateur.html">Calculateur</a>
+  </nav>
+  <div class="nav__actions">
+    <button class="btn btn--outline" id="loginBtn">Se connecter</button>
+    <button class="btn btn--primary" id="signupBtn">S'inscrire</button>
+  </div>
+</header>
+
+<main class="auth-wrap">
+  <div class="auth-panel">
+
+    <!-- Colonne illustration -->
+    <div class="auth-panel__illustration" role="presentation" aria-hidden="true"></div>
+
+    <!-- Colonne formulaire -->
+    <div class="auth-panel__form">
+      <div class="auth-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h1>Créer un compte</h1>
+      <p>Rejoignez <strong>CarbonFootprint TN</strong> et commencez à réduire votre impact carbone.</p>
+
+      <div class="form-banner form-banner--error" id="formError" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="formErrorText">Une erreur est survenue. Veuillez réessayer.</span>
+      </div>
+
+      <div class="form-banner form-banner--success" id="formSuccess" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>Compte créé avec succès ! Redirection…</span>
+      </div>
+
+      <form id="signupForm" novalidate>
+        <div class="field" id="fullNameField">
+          <label for="fullName">Nom complet</label>
+          <div class="field__control">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="fullName" name="fullName" placeholder="Ali Ben Salah" autocomplete="name" required>
+          </div>
+          <p class="field__error">Veuillez saisir votre nom complet.</p>
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email</label>
+          <div class="field__control">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" opacity="0"/><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+            <input type="email" id="email" name="email" placeholder="exemple@email.com" autocomplete="email" required>
+          </div>
+          <p class="field__error">Veuillez saisir une adresse email valide.</p>
+        </div>
+
+        <div class="field" id="passwordField">
+          <label for="password">Mot de passe</label>
+          <div class="field__control">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input type="password" id="password" name="password" class="has-toggle" placeholder="••••••••" autocomplete="new-password" minlength="8" required>
+            <button type="button" class="field__toggle" data-toggle-for="password" aria-label="Afficher le mot de passe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="password-strength" id="pwStrength" data-level="0">
+            <i></i><i></i><i></i>
+          </div>
+          <p class="field__hint">8 caractères minimum.</p>
+          <p class="field__error">Le mot de passe doit contenir au moins 8 caractères.</p>
+        </div>
+
+        <div class="field" id="confirmField">
+          <label for="confirmPassword">Confirmer le mot de passe</label>
+          <div class="field__control">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="has-toggle" placeholder="••••••••" autocomplete="new-password" required>
+            <button type="button" class="field__toggle" data-toggle-for="confirmPassword" aria-label="Afficher le mot de passe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="field__error">Les mots de passe ne correspondent pas.</p>
+        </div>
+
+        <button type="submit" class="btn btn--primary auth-submit" id="submitBtn">
+          <span class="spinner"></span>
+          <span class="auth-submit__label">S'inscrire</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">Vous avez déjà un compte ? <a href="connexion.html">Se connecter</a></p>
+    </div>
+
+    <!-- Colonne bénéfices -->
+    <div class="auth-panel__benefits">
+      <img src="assets/auth-globe.webp" alt="Illustration d'un globe entouré de feuilles vertes">
+      <h2>Pourquoi s'inscrire ?</h2>
+      <ul class="benefit-list">
+        <li>
+          <span class="benefit-list__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          </span>
+          Suivez et analysez votre empreinte carbone
+        </li>
+        <li>
+          <span class="benefit-list__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".5" fill="currentColor"/></svg>
+          </span>
+          Obtenez des recommandations personnalisées
+        </li>
+        <li>
+          <span class="benefit-list__icon">
+            <img src="assets/co2-icon.webp" class="icon-img" alt="CO2 Icon">
+          </span>
+          Agissez pour un avenir plus durable
+        </li>
+        <li>
+          <span class="benefit-list__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          </span>
+          Exportez vos rapports et suivez vos progrès
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>CarbonFootprint TN — Projet ATER, Association Tunisienne des Énergies Renouvelables</p>
+</footer>
+<script src="js/session.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
