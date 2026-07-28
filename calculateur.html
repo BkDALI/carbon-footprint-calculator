@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculateur — CarbonFootprint TN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/calculator.css">
+</head>
+<body class="app">
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <img src="assets/logo-icon.webp" class="brand-icon" alt="">
+      CarbonFootprint<span class="text-red">TN</span>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="calculateur.html" class="sidebar__link is-active">
+        <svg class="icon-line" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>
+        Calculateur
+      </a>
+      <a href="#" class="sidebar__link" id="historyLink">
+        <svg class="icon-line" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Historique
+      </a>
+    </nav>
+
+    <div class="sidebar__help">
+      <img src="assets/co2-icon.webp" class="icon-line icon-img" alt="">
+      <strong>Besoin d'aide ?</strong>
+      <span>Les facteurs d'émission utilisés sont détaillés dans le rapport PDF de chaque calcul.</span>
+    </div>
+
+    <button class="sidebar__logout" id="logoutBtn">
+      <svg class="icon-line" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+      Déconnexion
+    </button>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <a href="index.html" class="app-topbar__link">Accueil</a>
+      <div class="app-topbar__actions">
+        <div class="account" id="accountMenu">
+          <button class="account__trigger" id="accountTrigger">
+            <span class="account__avatar" id="accountAvatar">--</span>
+            <span id="accountName">Mon compte</span>
+            <svg viewBox="0 0 24 24" class="icon-line account__chevron"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="account__menu hidden" id="accountDropdown">
+            <button type="button" id="logoutBtn2">Se déconnecter</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <div class="app-content__main">
+
+        <h1>Calculateur d'empreinte carbone</h1>
+        <p class="app-subtitle">Répondez aux questions ci-dessous pour estimer votre empreinte carbone. Les facteurs d'émission utilisés sont adaptés au contexte tunisien.</p>
+
+        <div class="toolbar">
+          <div class="profile-toggle" id="profileToggle">
+            <button type="button" class="profile-toggle__btn is-active" data-value="individu">Individu</button>
+            <button type="button" class="profile-toggle__btn" data-value="entreprise">Entreprise</button>
+            <button type="button" class="profile-toggle__btn" data-value="projet">Projet</button>
+          </div>
+          <input type="text" id="label" class="label-input" placeholder="Nom du calcul (optionnel)">
+        </div>
+
+        <div class="stepper" id="stepper"></div>
+
+        <form id="calcForm">
+
+          <section class="q-card" id="questionCard"></section>
+
+          <section class="q-card hidden" id="resultsCard">
+            <div class="q-card__header">
+              <div class="wizard-question__icon-chip"><svg class="q-card__icon" viewBox="0 0 24 24"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="9"/><line x1="18" y1="20" x2="18" y2="5"/></svg></div>
+              <div><h2>Résultats</h2><p>Le détail de votre empreinte carbone estimée</p></div>
+            </div>
+            <div id="resultsPlaceholder" class="results-placeholder">Cliquez sur "Calculer mon empreinte" pour voir votre résultat détaillé.</div>
+            <div id="resultsDetail" class="hidden">
+              <table id="breakdownTable">
+                <thead><tr><th>Catégorie</th><th>kg CO₂e</th><th>%</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <p class="advice" id="advice"></p>
+              <div class="results-actions">
+                <a class="btn btn--outline" id="downloadPdfBtn" target="_blank" rel="noopener">📄 Télécharger le rapport PDF</a>
+                <a class="btn btn--outline" id="downloadExcelBtn" target="_blank" rel="noopener">📊 Exporter en Excel</a>
+              </div>
+            </div>
+          </section>
+
+        </form>
+
+        <div class="q-card__note trust-note">🛡️ Vos données sont sécurisées et utilisées uniquement pour le calcul de votre empreinte carbone.</div>
+
+        <div class="wizard__nav">
+          <button type="button" class="btn btn--ghost" id="prevBtn">← Précédent</button>
+          <button type="button" class="btn btn--primary" id="nextBtn">Suivant →</button>
+        </div>
+
+      </div>
+
+      <aside class="app-content__side">
+        <div class="recap-card">
+          <div class="recap-card__header">
+            <span>Récapitulatif</span>
+            <span class="badge badge--live" id="recapBadge">En cours</span>
+          </div>
+          <div class="recap-card__progress-row">
+            <span>Progression</span>
+            <span id="recapProgress">1 / 5</span>
+          </div>
+          <div class="wizard__progress"><div class="wizard__progress-bar" id="progressBar"></div></div>
+
+          <p class="recap-card__label">Émissions estimées</p>
+          <div class="recap-card__value"><span id="liveTotal">0</span><small>tCO₂e</small></div>
+          <p class="recap-card__sub" id="recapSub">Estimation partielle</p>
+
+          <div class="recap-card__chart">
+            <svg viewBox="0 0 100 100" class="donut-svg" id="liveDonut">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#EEF2EE" stroke-width="14"/>
+            </svg>
+            <ul class="legend" id="liveLegend"></ul>
+          </div>
+          <button type="button" class="btn btn--block" id="viewDetailBtn" disabled>Voir le détail →</button>
+        </div>
+
+        <div class="tip-card">
+          <img src="assets/co2-icon.webp" class="icon-line icon-img" alt="">
+          <strong>Chaque geste compte !</strong>
+          <span>Ensemble, réduisons notre impact pour un avenir durable en Tunisie.</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="modal hidden" id="historyModal">
+  <div class="modal__backdrop" id="historyBackdrop"></div>
+  <div class="modal__panel">
+    <div class="modal__header">
+      <h2>Historique des calculs</h2>
+      <button type="button" class="modal__close" id="historyCloseBtn" aria-label="Fermer">✕</button>
+    </div>
+    <div class="modal__body" id="historyBody">
+      <p class="results-placeholder">Chargement…</p>
+    </div>
+  </div>
+</div>
+
+<script src="js/session.js"></script>
+<script src="js/calculator.js"></script>
+</body>
+</html>

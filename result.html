@@ -1,0 +1,71 @@
+from sqlalchemy.orm import Session
+
+from app.core.emission_factors import (
+    ELECTRICITY_FACTOR_KG_PER_KWH,
+    FUEL_FACTORS_KG_PER_LITRE,
+    GAS_FACTOR_KG_PER_M3,
+    TRANSPORT_FACTORS_KG_PER_KM,
+    BUILDING_FACTOR_KG_PER_M2_YEAR,
+    INDUSTRY_FACTOR_KG_PER_UNIT,
+)
+from app.models.calculation import Calculation
+from app.schemas.calculation import CalculationCreate
+
+
+def compute_breakdown(data: CalculationCreate) -> dict:
+    electricity = data.electricity.consumption_kwh * ELECTRICITY_FACTOR_KG_PER_KWH
+
+    fuel = (
+        data.fuel.essence_litres * FUEL_FACTORS_KG_PER_LITRE["essence"]
+        + data.fuel.diesel_litres * FUEL_FACTORS_KG_PER_LITRE["diesel"]
+        + data.fuel.gpl_litres * FUEL_FACTORS_KG_PER_LITRE["gpl"]
+        + data.fuel.gaz_naturel_m3 * GAS_FACTOR_KG_PER_M3
+    )
+
+    transport = (
+        data.transport.voiture_km * TRANSPORT_FACTORS_KG_PER_KM["voiture"]
+        + data.transport.bus_km * TRANSPORT_FACTORS_KG_PER_KM["bus"]
+        + data.transport.train_km * TRANSPORT_FACTORS_KG_PER_KM["train"]
+        + data.transport.avion_km * TRANSPORT_FACTORS_KG_PER_KM["avion"]
+    )
+
+    building = data.building.surface_m2 * BUILDING_FACTOR_KG_PER_M2_YEAR
+    industry = data.industry.quantite_produite * INDUSTRY_FACTOR_KG_PER_UNIT
+
+    return {
+        "electricity": round(electricity, 2),
+        "fuel": round(fuel, 2),
+        "transport": round(transport, 2),
+        "building": round(building, 2),
+        "industry": round(industry, 2),
+    }
+
+
+def create_calculation(db: Session, data: CalculationCreate) -> Calculation:
+    breakdown = compute_breakdown(data)
+    total = round(sum(breakdown.values()), 2)
+
+    calculation = Calculation(
+        user_id=data.user_id,
+        label=data.label,
+        input_data=data.model_dump(),
+        breakdown=breakdown,
+        total_co2eq_kg=total,
+    )
+    db.add(calculation)
+    db.commit()
+    db.refresh(calculation)
+    return calculation
+
+
+def get_user_calculations(db: Session, user_id: int):
+    return (
+        db.query(Calculation)
+        .filter(Calculation.user_id == user_id)
+        .order_by(Calculation.created_at.desc())
+        .all()
+    )
+
+
+def get_calculation(db: Session, calculation_id: int):
+    return db.query(Calculation).filter(Calculation.id == calculation_id).first()
