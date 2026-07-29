@@ -1,6 +1,5 @@
 """Génération des rapports PDF et Excel pour un calcul d'empreinte carbone."""
 import io
-import math
 from datetime import datetime
 
 from openpyxl import Workbook
@@ -14,7 +13,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 from reportlab.graphics.shapes import Drawing, Rect, String, Wedge, Circle
 
-from app.core.emission_factors import SOURCES_TABLE, TUNISIE
+from app.core.emission_factors import SOURCES_TABLE, TUNISIE, DETAILED_METHODOLOGY
 from app.models.calculation import Calculation
 from app.models.user import User
 
@@ -43,7 +42,7 @@ CATEGORY_INFO = {
 def _ordered_breakdown(calculation: Calculation):
     """Renvoie [(cle, label, valeur, pourcentage, couleur), ...] triés du plus au moins émetteur."""
     total = calculation.total_co2eq_kg or 0
-    items = [(k, v) for k, v in calculation.breakdown.items() if v and v > 0]
+    items = [(k, v) for k, v in (calculation.breakdown or {}).items() if v and v > 0]
     items.sort(key=lambda kv: kv[1], reverse=True)
     return [
         (k, CATEGORY_INFO.get(k, (k, "", "#999999"))[0], v, (v / total * 100 if total else 0), CATEGORY_INFO.get(k, (k, "", "#999999"))[2])
@@ -321,11 +320,16 @@ def generate_pdf(calculation: Calculation, user: User) -> bytes:
         story += [Spacer(1, 16), Paragraph("Recommandation", h2_style), reco_table]
 
     # ---- Sources et méthodologie ----
-    tn_count = sum(1 for *_r, origin, _s in SOURCES_TABLE if origin == TUNISIE)
+    tn_count = sum(1 for _, _, origin, _ in SOURCES_TABLE if origin == TUNISIE)
     intl_count = len(SOURCES_TABLE) - tn_count
     story += [
         Spacer(1, 16),
         Paragraph("Sources et méthodologie", h2_style),
+        Paragraph(
+            f"{tn_count} poste(s) reposent sur des données mesurées ou officielles tunisiennes, "
+            f"{intl_count} sur des références internationales faute de donnée tunisienne publiée.",
+            meta_style,
+        ),
         Spacer(1, 8),
     ]
     origin_style_tn = ParagraphStyle("OriginTN", parent=source_style, textColor=BRAND_GREEN, fontName="Helvetica-Bold")
@@ -343,6 +347,36 @@ def generate_pdf(calculation: Calculation, user: User) -> bytes:
         ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
     ]))
     story.append(source_table)
+
+    # ---- Annexe : méthodologie de calcul détaillée ----
+    story += [PageBreak(), Paragraph("Annexe — Détail des calculs (facteurs dérivés)", h2_style)]
+    story.append(Paragraph(
+        "Pour les postes dont le facteur est calculé (et non directement publié), voici le détail "
+        "du calcul à partir des données brutes du Document d'inventaire national de GES "
+        "(NID Tunisie, Édition 2024).",
+        meta_style,
+    ))
+    story.append(Spacer(1, 8))
+
+    for item in DETAILED_METHODOLOGY:
+        block_rows = [
+            [Paragraph(f"<b>{item['poste']}</b>", source_head_style), ""],
+            [Paragraph("Facteur d'émission (FE)", source_style), Paragraph(item["fe_kg_par_tj"], source_style)],
+            [Paragraph("Pouvoir calorifique inférieur (PCI)", source_style), Paragraph(item["pci"], source_style)],
+            [Paragraph("Densité", source_style), Paragraph(item["densite"], source_style)],
+            [Paragraph("Origine du FE", source_style), Paragraph(item["origine_fe"], source_style)],
+            [Paragraph("Formule", source_style), Paragraph(item["formule"], source_style)],
+        ]
+        block_table = Table(block_rows, colWidths=[5 * cm, 12 * cm])
+        block_table.setStyle(TableStyle([
+            ("SPAN", (0, 0), (1, 0)),
+            ("BACKGROUND", (0, 0), (-1, 0), BG_SOFT),
+            ("GRID", (0, 0), (-1, -1), 0.4, LINE),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ]))
+        story += [block_table, Spacer(1, 10)]
 
     doc.build(story, onFirstPage=_draw_header, onLaterPages=_draw_header, canvasmaker=_FooterCanvas)
     return buffer.getvalue()
@@ -477,6 +511,27 @@ def generate_excel(calculation: Calculation, user: User) -> bytes:
     for col, width in (("A", 20), ("B", 20), ("C", 16), ("D", 62)):
         src.column_dimensions[col].width = width
     src.freeze_panes = "A2"
+
+    # ---- Feuille Méthodologie détaillée ----
+    meth = wb.create_sheet("Méthodologie détaillée")
+    meth_headers = ["Poste", "Facteur d'émission (FE)", "PCI", "Densité", "Origine du FE", "Formule"]
+    for i, h in enumerate(meth_headers):
+        meth.cell(row=1, column=1 + i, value=h)
+    _style_header_row(meth, 1, 1, len(meth_headers))
+    mr = 2
+    for item in DETAILED_METHODOLOGY:
+        values = [item["poste"], item["fe_kg_par_tj"], item["pci"], item["densite"], item["origine_fe"], item["formule"]]
+        for c, val in enumerate(values, start=1):
+            cell = meth.cell(row=mr, column=c, value=val)
+            cell.border = BORDER
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
+        if mr % 2 == 0:
+            for c in range(1, len(meth_headers) + 1):
+                meth.cell(row=mr, column=c).fill = BAND_FILL
+        mr += 1
+    for col, width in (("A", 16), ("B", 20), ("C", 26), ("D", 30), ("E", 34), ("F", 40)):
+        meth.column_dimensions[col].width = width
+    meth.freeze_panes = "A2"
 
     buffer = io.BytesIO()
     wb.save(buffer)

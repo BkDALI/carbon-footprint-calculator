@@ -18,7 +18,7 @@ Ce qui est réellement tunisien à ce jour :
   "national basé sur des mesures de la STIR" (Société Tunisienne des Industries de
   Raffinage) ; le gaz naturel utilise un facteur Tier 2 spécifique au pays, recalculé
   chaque année selon le mix gaz tunisien (STEG) / gaz algérien importé (SOTUGAT).
-  Voir _derive_kg_per_litre ci-dessous pour le détail du calcul.
+  Voir _derive_kg_per_litre ci-dessous, et DETAILED_METHODOLOGY, pour le détail du calcul.
 - Voiture électrique : calculée à partir du facteur réseau tunisien ci-dessus
   (tunisienne "par construction", même si la consommation kWh/km retenue est une
   moyenne internationale).
@@ -50,9 +50,14 @@ GPL, alimentation, bâtiment, industrie, bus, avion. Pour le GPL, on utilise
 cependant la même valeur par défaut IPCC 2006 que l'inventaire national tunisien
 lui-même (le NID ne mesure pas de facteur GPL propre à la Tunisie).
 
-Toutes les valeurs sont indicatives et destinées à un usage pédagogique. Le détail
-de chaque source est repris dans SOURCES_TABLE, réutilisé tel quel dans le rapport
-PDF et l'export Excel pour que l'utilisateur puisse vérifier chaque hypothèse.
+Toutes les valeurs sont indicatives et destinées à un usage pédagogique.
+
+SOURCES_TABLE donne une justification courte par poste (organisme + méthode),
+réutilisée telle quelle dans le rapport PDF et l'export Excel. Pour les postes
+dont le facteur est calculé à partir de données brutes (essence, diesel, gaz
+naturel), le détail complet du calcul (FE, PCI, densité, formule) est repris
+séparément dans DETAILED_METHODOLOGY et affiché en annexe du rapport PDF, afin
+de ne pas alourdir le tableau de sources principal.
 """
 
 
@@ -99,7 +104,7 @@ TRANSPORT_FACTORS_KG_PER_KM = {
     "moto": 0.09,                             # scooter/moto thermique, moyenne deux-roues motorisés
     "bus": 0.10,
     "train": 0.04,                            # réseau SNCFT non électrifié (traction diesel)
-    "avion": 0.25,
+    "avion": 0.18,                            # moyen-courrier avec traînées de condensation (ADEME/Impact CO2)
 }
 
 BUILDING_FACTOR_KG_PER_M2_YEAR = 15.0
@@ -129,35 +134,65 @@ _fmt = lambda v: str(v).replace(".", ",")
 
 SOURCES_TABLE = [
     ("Électricité", "0,483 kgCO2e/kWh", TUNISIE,
-     "Ember / IEA / EIA (agrégées par Low-Carbon Power) — intensité carbone mesurée du réseau tunisien, 2025 : 483 gCO2eq/kWh, cycle de vie complet (lowcarbonpower.org/region/Tunisia)"),
+     "Ember / IEA / EIA (Low-Carbon Power) — réseau tunisien mesuré, 2025, cycle de vie complet (lowcarbonpower.org/region/Tunisia)"),
     ("Essence", f"{_fmt(_ESSENCE_FACTOR)} kgCO2e/L", TUNISIE,
-     "NID Tunisie, Édition 2024 (CCNUCC) — FE CO2 = 71 879 kg/TJ, facteur national basé sur des mesures de la STIR (Société Tunisienne des Industries de Raffinage) ; PCI = 44,380 MJ/kg [ONEM]. Combustion seule (hors amont extraction/raffinage/transport, par convention des inventaires nationaux GIEC) ; densité 0,745 kg/L retenue par hypothèse standard, non issue du NID"),
+     "NID Tunisie 2024 (CCNUCC) — facteur national mesuré (STIR). Combustion seule ; densité par hypothèse standard"),
     ("Diesel", f"{_fmt(_DIESEL_FACTOR)} kgCO2e/L", TUNISIE,
-     "NID Tunisie, Édition 2024 (CCNUCC) — FE CO2 = 72 824 kg/TJ, facteur national basé sur des mesures de la STIR ; PCI = 42,998 MJ/kg [ONEM]. Combustion seule (hors amont) ; densité 0,835 kg/L retenue par hypothèse standard, non issue du NID"),
+     "NID Tunisie 2024 (CCNUCC) — facteur national mesuré (STIR). Combustion seule ; densité par hypothèse standard"),
     ("GPL", "1,86 kgCO2e/L", REF_INTL,
-     "IPCC 2006 par défaut (63 100 kg/TJ) — c'est la même valeur par défaut que celle utilisée telle quelle dans le NID Tunisie 2024, faute de mesure nationale propre au GPL"),
+     "IPCC 2006 par défaut — valeur reprise telle quelle par le NID Tunisie 2024, faute de mesure nationale"),
     ("Gaz naturel", f"{_fmt(_GAZ_NATUREL_FACTOR)} kgCO2e/m³", TUNISIE,
-     "NID Tunisie, Édition 2024 (CCNUCC) — FE CO2 = 57 725 kg/TJ (2022), facteur Tier 2 spécifique au pays recalculé chaque année selon le mix gaz tunisien [STEG] / gaz algérien importé [SOTUGAT] ; PCI moyen ≈ 37,8 MJ/Nm³ [STEG, SOTUGAT]. Combustion seule"),
+     "NID Tunisie 2024 (CCNUCC) — facteur Tier 2 pays-spécifique, mix STEG / gaz algérien importé (SOTUGAT)"),
     ("Voiture thermique", "0,20 kgCO2e/km", REF_INTL,
-     "ADEME Base Carbone / Impact CO2 — voiture thermique moyenne, cycle de vie"),
+     "ADEME Base Carbone — voiture thermique moyenne, cycle de vie"),
     ("Voiture hybride", "0,14 kgCO2e/km", REF_INTL,
-     "Estimation : ~70 % du facteur thermique (meilleure efficacité, hybride non rechargeable)"),
+     "Estimation : ~70 % du facteur thermique (hybride non rechargeable)"),
     ("Voiture électrique", f"{_fmt(_VOITURE_ELECTRIQUE_FACTOR)} kgCO2e/km", TUNISIE,
-     f"Calculé à partir du facteur réseau tunisien ci-dessus : 0,18 kWh/km (consommation moyenne VE, référence internationale) x {_fmt(ELECTRICITY_FACTOR_KG_PER_KWH)} kgCO2e/kWh (réseau tunisien) — non neutre en carbone en Tunisie contrairement à des réseaux plus décarbonés"),
+     "Calculé : consommation moyenne VE (référence internationale) × facteur réseau tunisien ci-dessus"),
     ("Moto / scooter", "0,09 kgCO2e/km", REF_INTL,
-     "ADEME Base Carbone / Impact CO2 — moyenne deux-roues motorisés thermiques"),
+     "ADEME Base Carbone — moyenne deux-roues motorisés thermiques"),
     ("Bus", "0,10 kgCO2e/km", REF_INTL,
      "ADEME Base Carbone — autobus urbain, moyenne par passager"),
     ("Train", "0,04 kgCO2e/km", TUNISIE,
-     "Choix méthodologique tunisien : réseau SNCFT non électrifié (100 % traction diesel), donc facteur diesel retenu plutôt qu'un facteur train électrique type TGV ; valeur numérique par analogie avec les TER diesel français faute de mesure SNCFT publiée"),
-    ("Avion", "0,25 kgCO2e/km", REF_INTL,
-     "ADEME Base Carbone / Impact CO2 — vol moyen-courrier, moyenne par passager"),
+     "Réseau SNCFT non électrifié (100 % diesel) — valeur par analogie avec les TER diesel français"),
+    ("Avion", "0,18 kgCO2e/km", REF_INTL,
+     "ADEME / Impact CO2 — vol moyen-courrier (1000-3500 km), trainées de condensation incluses, moyenne par passager"),
     ("Bâtiment", "15 kgCO2e/m²/an", REF_INTL,
-     "Estimation indicative : proxy simplifié pour l'enveloppe du bâtiment (carbone incorporé amorti, pertes non couvertes par les postes énergie) — pas de base ADEME dédiée ni de donnée tunisienne publiée"),
+     "Estimation indicative — proxy simplifié, pas de base ADEME dédiée ni de donnée tunisienne"),
     ("Industrie", "500 kgCO2e/unité", REF_INTL,
-     "Estimation générique par unité produite — à calibrer selon le secteur d'activité réel, pas de donnée sectorielle tunisienne disponible"),
+     "Estimation générique par unité produite — à calibrer selon le secteur d'activité réel"),
     ("Alimentation", "900 à 2200 kgCO2e/an selon régime", REF_INTL,
-     "ADEME / Carbone4 (Agribalyse) — empreinte alimentaire annuelle moyenne par régime, données françaises faute de données tunisiennes publiées"),
+     "ADEME / Carbone4 (Agribalyse) — moyenne française par régime, faute de données tunisiennes"),
     ("Déchets", "0,10 à 0,45 kgCO2e/kg", REF_INTL,
-     "ADEME Base Carbone — traitement des ordures ménagères (enfouissement/incinération vs. tri-recyclage), moyenne française. Contexte tunisien réel documenté (ANGed 2023) : 70 % des déchets ménagers finissent en décharge contrôlée, 20 % dans la nature, 8 % seulement recyclés — sans captage de méthane systématique documenté, contrairement au parc français pris en référence ici. La valeur retenue est donc probablement optimiste pour la Tunisie."),
+     "ADEME Base Carbone (moyenne française) — contexte réel tunisien (ANGed 2023 : 70 % décharge, 20 % nature, 8 % recyclé) probablement plus favorable au réseau français"),
+]
+
+# Détail des calculs pour les facteurs dérivés (essence, diesel, gaz naturel).
+# Repris dans une annexe méthodologique du rapport PDF, séparée du tableau
+# de sources principal pour ne pas l'alourdir.
+DETAILED_METHODOLOGY = [
+    {
+        "poste": "Essence",
+        "fe_kg_par_tj": "71 879 kg/TJ",
+        "pci": "44,380 MJ/kg [ONEM]",
+        "densite": "0,745 kg/L (hypothèse standard, non issue du NID)",
+        "formule": f"(71 879 / 1 000 000) × 44,380 × 0,745 = {_fmt(_ESSENCE_FACTOR)} kgCO2e/L",
+        "origine_fe": "Mesuré STIR (Société Tunisienne des Industries de Raffinage)",
+    },
+    {
+        "poste": "Diesel",
+        "fe_kg_par_tj": "72 824 kg/TJ",
+        "pci": "42,998 MJ/kg [ONEM]",
+        "densite": "0,835 kg/L (hypothèse standard, non issue du NID)",
+        "formule": f"(72 824 / 1 000 000) × 42,998 × 0,835 = {_fmt(_DIESEL_FACTOR)} kgCO2e/L",
+        "origine_fe": "Mesuré STIR (Société Tunisienne des Industries de Raffinage)",
+    },
+    {
+        "poste": "Gaz naturel",
+        "fe_kg_par_tj": "57 725 kg/TJ (2022)",
+        "pci": "≈ 37,8 MJ/Nm³ — moyenne (37,564 [STEG] + 38,008 [SOTUGAT]) / 2",
+        "densite": "—",
+        "formule": f"(57 725 / 1 000 000) × 37,8 ≈ {_fmt(_GAZ_NATUREL_FACTOR)} kgCO2e/m³",
+        "origine_fe": "Tier 2 pays-spécifique, recalculé chaque année, mix STEG / gaz algérien importé (SOTUGAT)",
+    },
 ]
